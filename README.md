@@ -1,6 +1,8 @@
 # electron-vk-oauth2
 A module which helps to complete vk.com OAuth2 process for standalone apps.
 
+[![npm version](https://badge.fury.io/js/electron-vk-oauth2.svg)](https://badge.fury.io/js/electron-vk-oauth2)
+
 ![Screenshot](/screenshot.png?raw=true "electron-vk-oauth2")
 
 ## Usage
@@ -84,7 +86,7 @@ authenticateVK({
 }, {
     width: 1024,
     height: 720,
-    parent: win, // main application window on top of which the auth window will stay
+    parent: win, // main application window
     minimizable: false,
     maximizable: false,
     resizable: false,

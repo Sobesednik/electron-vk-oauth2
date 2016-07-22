@@ -8,6 +8,14 @@ const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
 const url = require('url');
 
+// http://stackoverflow.com/a/35820220
+function promiseState(p) {
+    return Promise.race([
+        Promise.all([p, Promise.resolve()]).then(() => "fulfilled", () => "rejected"),
+        Promise.resolve().then(0).then(() => "pending")
+    ]);
+}
+
 describe('electron-vk-oauth', function () {
     const appId = '1234567';
 
@@ -151,7 +159,7 @@ describe('electron-vk-oauth', function () {
         });
     });
     describe('logic', function () {
-        let evol
+        let evo;
         beforeEach(function () {
             evo = electronVkOauth({ appId });
         });
@@ -175,9 +183,19 @@ describe('electron-vk-oauth', function () {
                 fn = webContentsOnStub.firstCall.args[1];
 
                 state = url.parse(loadURLStub.firstCall.args[0], true).query.state;
-            })
+            });
+            it('does not fulfill or reject promise if redirect uri does not match', function () {
+                const url = 'https://login.vk.com';
+                fn.call(null, event, oldUrl, url);
+                return promiseState(evo).then((res) => {
+                    expect(res).to.equal('pending');
+                });
+            });
             it('rejects promise if state is missing', function () {
                 const url = 'https://oauth.vk.com/blank.html#somedata';
+                evo.catch().then(() => {
+                    evo.isRunning = false;
+                })
                 fn.call(null, event, oldUrl, url);
                 return expect(evo)
                     .to.be.rejectedWith(`Incorrect state: expected undefined to equal ${state}`);
@@ -192,6 +210,11 @@ describe('electron-vk-oauth', function () {
                       'error_description=User%20denied%20your%20request';
                 fn.call(null, event, oldUrl, url);
                 return expect(evo).to.be.rejectedWith('User denied your request');
+            });
+            it('rejects promise no error or access token are available', function () {
+                const url = `https://oauth.vk.com/blank.html#state=${state}`;
+                fn.call(null, event, oldUrl, url);
+                return expect(evo).to.be.rejectedWith('No access token or error is available');
             });
             it('fulfills the promise when access_token is present', function () {
                 const accessToken = 'test_access_token';

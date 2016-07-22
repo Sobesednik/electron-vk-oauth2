@@ -4,7 +4,8 @@
   "description": "A module which helps to complete vk.com OAuth2 process for standalone apps.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha test",
+    "cover": "istanbul cover _mocha test"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
+    "istanbul": "^0.4.4",
     "mocha": "^2.5.3",
     "proxyquire": "^1.7.10",
     "sinon": "^1.17.4",

@@ -68,12 +68,14 @@ function authenticateVK(options, windowOptions) {
                         userId: query.user_id,
                         expiresIn: query.expires_in,
                     });
+                } else {
+                    reject(new Error('No access token or error is available'));
                 }
                 win.destroy();
             }
         });
         win.on('closed', () => {
-            reject(new Error('Auth window was closed before completing authentication'))
+            reject(new Error('Auth window was closed before completing authentication'));
         });
     });
 }

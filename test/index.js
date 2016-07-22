@@ -160,6 +160,11 @@ describe('electron-vk-oauth', function () {
     });
     describe('logic', function () {
         let evo;
+
+        const accessToken = 'test_access_token';
+        const userId = 'test_user_id';
+        const expiresIn = '86400';
+
         beforeEach(function () {
             evo = electronVkOauth({ appId });
         });
@@ -217,9 +222,6 @@ describe('electron-vk-oauth', function () {
                 return expect(evo).to.be.rejectedWith('No access token or error is available');
             });
             it('fulfills the promise when access_token is present', function () {
-                const accessToken = 'test_access_token';
-                const userId = 'test_user_id';
-                const expiresIn = '86400';
                 const url = `https://oauth.vk.com/blank.html#state=${state}&access_token=${accessToken}&` +
                       `user_id=${userId}&expires_in=${expiresIn}`;
                 fn.call(null, event, oldUrl, url);
@@ -229,6 +231,17 @@ describe('electron-vk-oauth', function () {
                     expect(res.userId).to.equal(userId);
                     expect(res.expiresIn).to.equal(expiresIn);
                 });
+            });
+            it('destroys window on error', function () {
+                const url = `https://oauth.vk.com/blank.html#state=${state}`;
+                fn.call(null, event, oldUrl, url);
+                expect(destroyStub).calledOnce;
+            });
+            it('destroys window on success', function () {
+                const url = `https://oauth.vk.com/blank.html#state=${state}&access_token=${accessToken}&` +
+                      `user_id=${userId}&expires_in=${expiresIn}`;
+                fn.call(null, event, oldUrl, url);
+                expect(destroyStub).calledOnce;
             });
         });
     });

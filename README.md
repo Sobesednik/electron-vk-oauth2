@@ -43,12 +43,14 @@ occured, the promise will be rejected.
 
 The first argument is vk specific options:
 - *appId*: your app id
-- *scope*: required scope
+- *scope*: required scope (see [access permissions](https://new.vk.com/dev/permissions))
 - *display* [popup]: display type, one of the following: page, popup, mobile
 - *revoke*: whether to ask users for permissions every time
 - *authorizeUrl*: https://oauth.vk.com/authorize but you can override it
 - *redirectUri*: https://oauth.vk.com/blank.html for standalone apps, but the
-option to override it is available if the API changes in future.
+option to override it is available if the API changes in future. Note that all
+standalone apps are required to use this address, otherwise it's impossible to
+complete authorisation.
 
 See more info about vk auth flow for standalone apps
 [here](https://new.vk.com/dev/implicit_flow_user).

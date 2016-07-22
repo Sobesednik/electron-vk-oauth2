@@ -25,6 +25,10 @@ authenticateVK({
     console.log('Access token: %s', res.accessToken);
     console.log('User id: %s', res.userId);
     console.log('Expires in: %s', res.expiresIn);
+}).catch((err) => {
+    // E.g., user denied permissions, or user closed the window without
+    // authorising the app.
+    console.error(err);
 });
 ```
 

@@ -60,10 +60,14 @@ parameters as properties of the object.
 This package uses `debug` module. To enable printing debugging information to
 console, start your app with `DEBUG=electron-vk-oauth2` environment variable.
 
-```
-electron-vk-oauth2 open vk auth window https://oauth.vk.com/authorize?state=2397&response_type=token&client_id=1234567&scope=photos&display=popup&revoke=1&redirect_uri=https%3A%2F%2Foauth.vk.com%2Fblank.html +13ms
-
-electron-vk-oauth2 Url { protocol: 'https:', slashes: true, auth: null, host: 'oauth.vk.com', port: null, hostname: 'oauth.vk.com', hash: '#error=access_denied&error_reason=user_denied&error_description=User%20denied%20your%20request&state=2397', search: null, query: null, pathname: '/blank.html', path: '/blank.html', href: 'https://oauth.vk.com/blank.html#error=access_denied&error_reason=user_denied&error_description=User%20denied%20your%20request&state=2397' } +2s
-
-electron-vk-oauth2 { error: 'access_denied', error_reason: 'user_denied', error_description: 'User denied your request', state: '2397' } +13ms
+```bash
+electron-vk-oauth2 open vk auth window https://oauth.vk.com/authorize?state=301&response_type=token&client_id=1234567&scope=photos&display=popup&revoke=1&redirect_uri=https%3A%2F%2Foauth.vk.com%2Fblank.html +13ms
+# user logged in
+electron-vk-oauth2 Redirect to https://oauth.vk.com/authorize?client_id=5551949&redirect_uri=https%3A%2F%2Foauth.vk.com%2Fblank.html&response_type=token&scope=4&v=&state=301&revoke=1&display=popup&__q_hash=xyz +5s
+# user denied permissions
+electron-vk-oauth2 Redirect to https://oauth.vk.com/blank.html#error=access_denied&error_reason=user_denied&error_description=User denied your request&state=301 +11s
+electron-vk-oauth2 { error: 'access_denied', error_reason: 'user_denied', error_description: 'User denied your request', state: '301' } +1ms
+# or user allowed permissions
+electron-vk-oauth2 Redirect to https://oauth.vk.com/blank.html#access_token=xyz&expires_in=86400&user_id=123&state=1462 +1s
+electron-vk-oauth2 { access_token: 'xyz', expires_in: '86400', user_id: '123', state: '1462' } +1ms
 ```

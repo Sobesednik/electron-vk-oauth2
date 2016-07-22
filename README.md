@@ -43,7 +43,6 @@ function createWindow() {
 }
 
 app.on('ready', createWindow);
-
 ```
 
 
@@ -73,7 +72,24 @@ See more info about vk auth flow for standalone apps
 
 The second argument is options for the window. By default, it will be open with
 width of `655` and height of `430` and `null` parent, but you can specify these
-parameters as properties of the object.
+parameters as properties of the object, or you can pass other options supported
+by the [BrowserWindow](http://electron.atom.io/docs/api/browser-window/):
+
+```javascript
+const authenticateVK = require('electron-vk-oauth2');
+
+authenticateVK({
+    appId: 1234567,
+    display: page,
+}, {
+    width: 1024,
+    height: 720,
+    parent: win, // main application window on top of which the auth window will stay
+    minimizable: false,
+    maximizable: false,
+    resizable: false,
+});
+```
 
 ### Debug
 

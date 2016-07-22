@@ -24,6 +24,11 @@ function authenticateVK(options, windowOptions) {
         return Promise.reject(new Error('App id is not specified'));
     }
 
+    const windowOpts = Object.assign({}, {
+        height: 430,
+        width: 655,
+    }, windowOptions);
+
     const state = Math.floor(Math.random() * 10000);
     const response_type = 'token';
 
@@ -39,7 +44,7 @@ function authenticateVK(options, windowOptions) {
 
     const vkurl = `${opts.authorizeUrl}?${query}`;
 
-    const win = new BrowserWindow({ parent: mainWin, height: 430, width: 655 });
+    const win = new BrowserWindow(windowOpts);
 
     debug('open vk auth window %s', vkurl);
     win.loadURL(vkurl);

@@ -14,22 +14,36 @@ npm i --save electron-vk-oauth2
 ```
 
 ```javascript
+const electron = require('electron');
+const {app, BrowserWindow} = electron;
 const authenticateVK = require('electron-vk-oauth2');
-authenticateVK({
-    appId: '1234567',
-    scope: 'photos',
-    revoke: true,
-}, {
-    parent: this.win,
-}).then((res) => {
-    console.log('Access token: %s', res.accessToken);
-    console.log('User id: %s', res.userId);
-    console.log('Expires in: %s', res.expiresIn);
-}).catch((err) => {
-    // E.g., user denied permissions, or user closed the window without
-    // authorising the app.
-    console.error(err);
-});
+
+let win;
+function createWindow() {
+  win = new BrowserWindow({width: 800, height: 600});
+  win.loadURL(`file://${__dirname}/index.html`);
+
+  authenticateVK({
+      appId: '1234567',
+      scope: 'photos',
+      revoke: true,
+  }, {
+      parent: win,
+  }).then((res) => {
+      console.log('Access token: %s', res.accessToken);
+      console.log('User id: %s', res.userId);
+      console.log('Expires in: %s', res.expiresIn);
+      // now you can make requests to API using access token and pass data to
+      // to the renderer process.
+  }).catch((err) => {
+      // E.g., user denied permissions, or user closed the window without
+      // authorising the app.
+      console.error(err);
+  });
+}
+
+app.on('ready', createWindow);
+
 ```
 
 

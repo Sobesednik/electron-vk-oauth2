@@ -1,4 +1,4 @@
-const debug = require('debug');
+const debug = require('debug')('electron-vk-oauth2');
 const url = require('url');
 const qs = require('querystring');
 const BrowserWindow = require('electron').BrowserWindow;

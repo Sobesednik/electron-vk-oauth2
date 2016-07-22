@@ -1,5 +1,5 @@
 {
-  "name": "electron-vk-oauth",
+  "name": "electron-vk-oauth2",
   "version": "1.0.0",
   "description": "A module which helps to complete vk.com OAuth2 process for standalone apps.",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Sobesednik/electron-vk-oauth.git"
+    "url": "git+https://github.com/Sobesednik/electron-vk-oauth2.git"
   },
   "keywords": [
     "oauth",

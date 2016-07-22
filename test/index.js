@@ -1,8 +1,8 @@
 const chai = require('chai');
 const expect = chai.expect;
-const chaiAsPromised = require("chai-as-promised");
+const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
-const sinonChai = require("sinon-chai");
+const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
@@ -11,8 +11,8 @@ const url = require('url');
 // http://stackoverflow.com/a/35820220
 function promiseState(p) {
     return Promise.race([
-        Promise.all([p, Promise.resolve()]).then(() => "fulfilled", () => "rejected"),
-        Promise.resolve().then(0).then(() => "pending")
+        Promise.all([p, Promise.resolve()]).then(() => 'fulfilled', () => 'rejected'),
+        Promise.resolve().then(0).then(() => 'pending')
     ]);
 }
 
@@ -46,7 +46,7 @@ describe('electron-vk-oauth', function () {
                 loadURL: loadURLStub,
                 on: onStub,
                 destroy: destroyStub,
-            }
+            };
         });
         electronVkOauth = proxyquire('../index', {
             'electron': {
@@ -79,7 +79,7 @@ describe('electron-vk-oauth', function () {
                 });
                 it('has response_type set to token', function () {
                     expect(res.query.response_type).to.equal('token');
-                })
+                });
                 it('uses default authorizeUrl - https://oauth.vk.com/authorize', function () {
                     expect(`${res.protocol}//${res.host}${res.pathname}`)
                         .to.equal('https://oauth.vk.com/authorize');
@@ -102,7 +102,7 @@ describe('electron-vk-oauth', function () {
                     scope: 'photos',
                     display: 'mobile',
                     revoke: true,
-                }
+                };
                 electronVkOauth(options);
                 expect(loadURLStub).calledOnce;
                 res = url.parse(loadURLStub.firstCall.args[0], true);
@@ -127,7 +127,7 @@ describe('electron-vk-oauth', function () {
                     electronVkOauth({ appId });
                     expect(browserWindowSpy).calledWithNew;
                     res = browserWindowSpy.firstCall.args[0];
-                })
+                });
                 it('uses default height of 430', function () {
                     expect(res.height).to.equal(430);
                 });
@@ -200,7 +200,7 @@ describe('electron-vk-oauth', function () {
                 const url = 'https://oauth.vk.com/blank.html#somedata';
                 evo.catch().then(() => {
                     evo.isRunning = false;
-                })
+                });
                 fn.call(null, event, oldUrl, url);
                 return expect(evo)
                     .to.be.rejectedWith(`Incorrect state: expected undefined to equal ${state}`);
@@ -222,8 +222,8 @@ describe('electron-vk-oauth', function () {
                 return expect(evo).to.be.rejectedWith('No access token or error is available');
             });
             it('fulfills the promise when access_token is present', function () {
-                const url = `https://oauth.vk.com/blank.html#state=${state}&access_token=${accessToken}&` +
-                      `user_id=${userId}&expires_in=${expiresIn}`;
+                const url = `https://oauth.vk.com/blank.html#state=${state}&` +
+                      `access_token=${accessToken}&user_id=${userId}&expires_in=${expiresIn}`;
                 fn.call(null, event, oldUrl, url);
                 return evo.then((res) => {
                     expect(res).to.contain.keys(['accessToken', 'userId', 'expiresIn']);
@@ -238,8 +238,8 @@ describe('electron-vk-oauth', function () {
                 expect(destroyStub).calledOnce;
             });
             it('destroys window on success', function () {
-                const url = `https://oauth.vk.com/blank.html#state=${state}&access_token=${accessToken}&` +
-                      `user_id=${userId}&expires_in=${expiresIn}`;
+                const url = `https://oauth.vk.com/blank.html#state=${state}&` +
+                      `access_token=${accessToken}&user_id=${userId}&expires_in=${expiresIn}`;
                 fn.call(null, event, oldUrl, url);
                 expect(destroyStub).calledOnce;
             });

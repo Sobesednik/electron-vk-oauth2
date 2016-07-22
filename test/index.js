@@ -9,6 +9,8 @@ const sinon = require('sinon');
 const url = require('url');
 
 describe('electron-vk-oauth', function () {
+    const appId = '1234567';
+
     let sandbox;
     let electronVkOauth;
     let browserWindowSpy;
@@ -16,6 +18,7 @@ describe('electron-vk-oauth', function () {
     let webContentsOnStub;
     let onStub;
     let loadURLStub;
+    let destroyStub;
 
     beforeEach(function () {
         sandbox = sinon.sandbox.create();
@@ -24,6 +27,7 @@ describe('electron-vk-oauth', function () {
         webContentsOnStub = sandbox.stub();
         loadURLStub = sandbox.stub();
         onStub = sandbox.stub();
+        destroyStub = sandbox.stub();
 
         // cannot use arrow function otherwise sinon's calledWithNew won't work
         browserWindowSpy = sandbox.spy(function BrowserWindow() {
@@ -33,6 +37,7 @@ describe('electron-vk-oauth', function () {
                 },
                 loadURL: loadURLStub,
                 on: onStub,
+                destroy: destroyStub,
             }
         });
         electronVkOauth = proxyquire('../index', {
@@ -50,16 +55,11 @@ describe('electron-vk-oauth', function () {
     });
 
     describe('options', function () {
-        let evo;
-        const appId = '1234567';
-
         describe('main', function () {
             let res;
             describe('defaults', function () {
                 beforeEach(function () {
-                    electronVkOauth({
-                        appId,
-                    });
+                    electronVkOauth({ appId });
                     expect(loadURLStub).calledOnce;
                     res = url.parse(loadURLStub.firstCall.args[0], true);
                 });
@@ -73,7 +73,8 @@ describe('electron-vk-oauth', function () {
                     expect(res.query.response_type).to.equal('token');
                 })
                 it('uses default authorizeUrl - https://oauth.vk.com/authorize', function () {
-                    expect(`${res.protocol}//${res.host}${res.pathname}`).to.equal('https://oauth.vk.com/authorize');
+                    expect(`${res.protocol}//${res.host}${res.pathname}`)
+                        .to.equal('https://oauth.vk.com/authorize');
                 });
                 it('uses default redirect_uri - https://oauth.vk.com/blank.html', function () {
                     expect(res.query.redirect_uri).to.equal('https://oauth.vk.com/blank.html');
@@ -102,7 +103,8 @@ describe('electron-vk-oauth', function () {
                 expect(res.query.state).not.to.be.undefined;
                 expect(res.query.response_type).to.equal('token');
 
-                expect(`${res.protocol}//${res.host}${res.pathname}`).to.equal(options.authorizeUrl);
+                expect(`${res.protocol}//${res.host}${res.pathname}`)
+                    .to.equal(options.authorizeUrl);
                 expect(res.query.redirect_uri).to.equal(options.redirectUri);
                 expect(res.query.scope).to.equal('photos');
                 expect(res.query.display).to.equal(options.display);
@@ -114,9 +116,7 @@ describe('electron-vk-oauth', function () {
             describe('defaults', function () {
                 let res;
                 beforeEach(function () {
-                    electronVkOauth({
-                        appId,
-                    });
+                    electronVkOauth({ appId });
                     expect(browserWindowSpy).calledWithNew;
                     res = browserWindowSpy.firstCall.args[0];
                 })
@@ -146,12 +146,66 @@ describe('electron-vk-oauth', function () {
                 }, windowOptions);
                 expect(browserWindowSpy).calledWithNew;
 
-                expect(browserWindowSpy.firstCall.args[0].width).to.equal(width);
-                expect(browserWindowSpy.firstCall.args[0].height).to.equal(height);
-                expect(browserWindowSpy.firstCall.args[0].parent).to.equal(parent);
-                expect(browserWindowSpy.firstCall.args[0].minimizable).to.equal(windowOptions.minimizable);
-                expect(browserWindowSpy.firstCall.args[0].maximizable).to.equal(windowOptions.maximizable);
-                expect(browserWindowSpy.firstCall.args[0].resizable).to.equal(windowOptions.resizable);
+                expect(browserWindowSpy.firstCall.args[0]).to.eql(windowOptions);
+            });
+        });
+    });
+    describe('logic', function () {
+        let evol
+        beforeEach(function () {
+            evo = electronVkOauth({ appId });
+        });
+        it('rejects promise on window close', function () {
+            expect(onStub).calledOnce;
+            expect(onStub.firstCall.args[0]).to.equal('closed');
+            const fn = onStub.firstCall.args[1];
+            fn.call();
+            return expect(evo)
+                .to.be.rejectedWith('Auth window was closed before completing authentication');
+        });
+        describe('did-receive-redirect', function () {
+            let fn;
+            let state;
+            const event = { event: true }; // mock event
+            const oldUrl = '';
+
+            beforeEach(function () {
+                expect(webContentsOnStub).calledOnce;
+                expect(webContentsOnStub.firstCall.args[0]).to.equal('did-get-redirect-request');
+                fn = webContentsOnStub.firstCall.args[1];
+
+                state = url.parse(loadURLStub.firstCall.args[0], true).query.state;
+            })
+            it('rejects promise if state is missing', function () {
+                const url = 'https://oauth.vk.com/blank.html#somedata';
+                fn.call(null, event, oldUrl, url);
+                return expect(evo)
+                    .to.be.rejectedWith(`Incorrect state: expected undefined to equal ${state}`);
+            });
+            it('rejects promise if error is url', function () {
+                const url = `https://oauth.vk.com/blank.html#state=${state}&error`;
+                fn.call(null, event, oldUrl, url);
+                return expect(evo).to.be.rejected;
+            });
+            it('rejects promise if error is url and error_description is available', function () {
+                const url = `https://oauth.vk.com/blank.html#state=${state}&error=access_denied&` +
+                      'error_description=User%20denied%20your%20request';
+                fn.call(null, event, oldUrl, url);
+                return expect(evo).to.be.rejectedWith('User denied your request');
+            });
+            it('fulfills the promise when access_token is present', function () {
+                const accessToken = 'test_access_token';
+                const userId = 'test_user_id';
+                const expiresIn = '86400';
+                const url = `https://oauth.vk.com/blank.html#state=${state}&access_token=${accessToken}&` +
+                      `user_id=${userId}&expires_in=${expiresIn}`;
+                fn.call(null, event, oldUrl, url);
+                return evo.then((res) => {
+                    expect(res).to.contain.keys(['accessToken', 'userId', 'expiresIn']);
+                    expect(res.accessToken).to.equal(accessToken);
+                    expect(res.userId).to.equal(userId);
+                    expect(res.expiresIn).to.equal(expiresIn);
+                });
             });
         });
     });

@@ -50,11 +50,11 @@ function authenticateVK(options, windowOptions) {
     win.loadURL(vkurl);
 
     return new Promise((resolve, reject) => {
-        win.webContents.on('did-get-redirect-request', function (event, oldUrl, newUrl) {
+        win.webContents.on('did-get-redirect-request', (event, oldUrl, newUrl) => {
             const data = url.parse(newUrl);
             debug(data);
             // http://stackoverflow.com/questions/16733863/oauth2-0-implicit-grant-flow-why-use-url-hash-fragments
-            if (data.host === 'oauth.vk.com' && data.pathname === '/blank.html' && data.hash) {
+            if (`${data.protocol}//${data.host}${data.pathname}` === opts.redirectUri && data.hash) {
                 const query = qs.parse(data.hash.substring(1));
                 debug(query);
 

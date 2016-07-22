@@ -1,0 +1,25 @@
+{
+  "name": "electron-vk-oauth",
+  "version": "1.0.0",
+  "description": "A module which helps to complete vk.com OAuth2 process for standalone apps.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sobesednik/electron-vk-oauth.git"
+  },
+  "keywords": [
+    "oauth",
+    "oauth2",
+    "vk",
+    "electron"
+  ],
+  "author": "Anton <anton@sobedednik.media>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Sobesednik/electron-vk-oauth/issues"
+  },
+  "homepage": "https://github.com/Sobesednik/electron-vk-oauth#readme"
+}
